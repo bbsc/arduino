@@ -1,6 +1,7 @@
 int left_button=10;
 int right_button=11;
 
+int ships_position_old=5;
 int ships_possision=5;
 int ships_row=7;
 int columms[8] = {
@@ -15,8 +16,10 @@ int loop_limit=5000 ;
 
 int pixels[8][8];
 
-void set_ships_possision(int calumm) {
-  pixels[calumm][ships_row];
+void set_ships_possision(int column) {
+  pixels[ships_position_old][ships_row] = LOW;
+  pixels[column][ships_row] = HIGH;
+  ships_position_old = column;
 }
 
 
@@ -25,7 +28,7 @@ void refresh_pixels() {
     digitalWrite(columms[col], HIGH);
     for (int row = 0; row < 8; row++) {
       int pixel = pixels[col][row];
-      if (pixel==1) {
+      if (pixel==HIGH) {
         digitalWrite(rows[row], LOW);
       }
     }
@@ -92,8 +95,6 @@ void loop() {
 
   set_ships_possision(ships_possision);
 
-
-  //Serial.print("ships_possision  ");  
   // Serial.println(ships_possision);
   //delay(1000);
   //digitalWrite(columms[ships_possision],HIGH);
@@ -101,8 +102,9 @@ void loop() {
   last_right_button_state = right_button_pressed;
   if (loop_counting==loop_limit) {
     loop_counting=0;
-    
+
   }
-refresh_pixels();
+  refresh_pixels();
 }
+
 
