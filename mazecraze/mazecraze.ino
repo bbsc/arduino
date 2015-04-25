@@ -2,7 +2,12 @@ int left_button=10;
 int right_button=11;
 
 int ships_possision=5;
+int old_ships_possision=5;
 int ships_row=7;
+int walls_row=0;
+int old_walls_row=0;
+int the_wall[8] = {
+  HIGH,HIGH,LOW,HIGH,HIGH,HIGH,HIGH,HIGH};
 int columms[8] = {
   16,4,5,12,7,14,18,19};
 int rows[8] = {
@@ -11,12 +16,45 @@ int rows[8] = {
 int last_right_button_state=1;
 int last_left_button_state=1;
 int loop_counting=0;
-int loop_limit=5000 ;
+int loop_limit=600;
 
 int pixels[8][8];
 
 void set_ships_possision(int calumm) {
-  pixels[calumm][ships_row];
+  pixels[old_ships_possision][ships_row]=LOW;
+  pixels[calumm][ships_row]=HIGH;
+  old_ships_possision=calumm;
+}
+
+void check_walls_hit(){
+  if (ships_row==walls_row) {
+    if (pixels[walls_row][ships_possision] == HIGH) {
+      while (true){
+
+
+      }
+    }
+  }
+}
+
+
+void move_wall() {
+  for (int col = 0; col < 8; col++) {
+    pixels[col][old_walls_row] = LOW;
+  }
+
+  for (int col = 0; col < 8; col++) {
+    pixels[col][walls_row] = the_wall[col];
+  }
+
+  old_walls_row = walls_row;
+
+  walls_row = walls_row + 1;
+  if (walls_row > 7) {
+    walls_row = 0;
+
+  }
+
 }
 
 
@@ -58,7 +96,7 @@ void setup() {
 
 void loop() {
   loop_counting = loop_counting + 1;
-
+  check_walls_hit();
   // put your main code here, to run repeatedly:
   int right_button_pressed= digitalRead(right_button);
 
@@ -101,8 +139,12 @@ void loop() {
   last_right_button_state = right_button_pressed;
   if (loop_counting==loop_limit) {
     loop_counting=0;
-    
+    move_wall();
+
   }
-refresh_pixels();
+  refresh_pixels();
 }
+
+
+
 
