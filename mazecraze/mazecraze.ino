@@ -1,6 +1,7 @@
 int left_button=10;
 int right_button=11;
 
+int ships_position_old=5;
 int ships_possision=5;
 int old_ships_possision=5;
 int ships_row=7;
@@ -20,6 +21,7 @@ int loop_limit=600;
 
 int pixels[8][8];
 
+<<<<<<< HEAD
 void set_ships_possision(int calumm) {
   pixels[old_ships_possision][ships_row]=LOW;
   pixels[calumm][ships_row]=HIGH;
@@ -55,6 +57,12 @@ void move_wall() {
 
   }
 
+=======
+void set_ships_possision(int column) {
+  pixels[ships_position_old][ships_row] = LOW;
+  pixels[column][ships_row] = HIGH;
+  ships_position_old = column;
+>>>>>>> 1080d98e86e4cfe6d412429ab0f097f91486759e
 }
 
 
@@ -63,7 +71,7 @@ void refresh_pixels() {
     digitalWrite(columms[col], HIGH);
     for (int row = 0; row < 8; row++) {
       int pixel = pixels[col][row];
-      if (pixel==1) {
+      if (pixel==HIGH) {
         digitalWrite(rows[row], LOW);
       }
     }
@@ -130,8 +138,6 @@ void loop() {
 
   set_ships_possision(ships_possision);
 
-
-  //Serial.print("ships_possision  ");  
   // Serial.println(ships_possision);
   //delay(1000);
   //digitalWrite(columms[ships_possision],HIGH);
@@ -140,11 +146,6 @@ void loop() {
   if (loop_counting==loop_limit) {
     loop_counting=0;
     move_wall();
-
   }
   refresh_pixels();
 }
-
-
-
-
