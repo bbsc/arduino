@@ -21,7 +21,6 @@ int loop_limit=600;
 
 int pixels[8][8];
 
-<<<<<<< HEAD
 void set_ships_possision(int calumm) {
   pixels[old_ships_possision][ships_row]=LOW;
   pixels[calumm][ships_row]=HIGH;
@@ -56,13 +55,6 @@ void move_wall() {
     walls_row = 0;
 
   }
-
-=======
-void set_ships_possision(int column) {
-  pixels[ships_position_old][ships_row] = LOW;
-  pixels[column][ships_row] = HIGH;
-  ships_position_old = column;
->>>>>>> 1080d98e86e4cfe6d412429ab0f097f91486759e
 }
 
 
