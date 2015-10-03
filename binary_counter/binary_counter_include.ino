@@ -1,14 +1,10 @@
-int display_digit = 0;
-int long_wait = 250;
-int short_wait = 25;
-int pov_wait = 5;
+#define POV_DELAY 5
+#define SHORT_DELAY 25
+#define LONG_DELAY 250
 
 // pins that control which 7 segment display will be lit
 int segment_control_pins[] = { 19, 18, 17 };
 int switch_pins[] = { 7, 6, 5, 4, 3, 2, 1, 0 };
-
-// pin order for standard segments A,B,C,D,E,F,G
-int big_7segment_display[] = { 9, 10, 11, 12, 13, 14, 15, 16 };
 
 int BLANK_IDX = 10;
 
@@ -61,37 +57,37 @@ void startup_led_test() {
     select_display(display);    
     for (int thisPin = 0; thisPin < 7; thisPin++) { 
       digitalWrite(big_7segment_display[thisPin], HIGH);
-      delay(short_wait);
+      delay(SHORT_DELAY);
     }
-    delay(long_wait);
+    delay(LONG_DELAY);
     blank_display(big_7segment_display);
   }
-  delay(long_wait);
+  delay(LONG_DELAY);
 
   // test patterns
   for (int i = 0; i < 8; ++i) {
     for (int j = 0; j < 5; ++j) {
       select_display(0);
-      light_segments(big_7segment_display, test_patterns_1[i]);
+      light_segments(big_7segment_display, test_patterns_1[i], 0, 0);
 
       select_display(1);
-      light_segments(big_7segment_display, test_patterns_1[i]);
+      light_segments(big_7segment_display, test_patterns_1[i], 0, 0);
 
       select_display(2);
-      light_segments(big_7segment_display, test_patterns_1[i]);
+      light_segments(big_7segment_display, test_patterns_1[i], 0, 0);
     }
   }
 
   for (int i = 0; i < 8; ++i) {
     for (int j = 0; j < 5; ++j) {
       select_display(0);
-      light_segments(big_7segment_display, test_patterns_2[i]);
+      light_segments(big_7segment_display, test_patterns_2[i], 0, 0);
 
       select_display(1);
-      light_segments(big_7segment_display, test_patterns_2[i]);
+      light_segments(big_7segment_display, test_patterns_2[i], 0, 0);
 
       select_display(2);
-      light_segments(big_7segment_display, test_patterns_2[i]);
+      light_segments(big_7segment_display, test_patterns_2[i], 0, 0);
     }
   }
   
@@ -99,24 +95,24 @@ void startup_led_test() {
     // j controls how many times the display is lit (duration)
     for (int j = 0; j < 5; ++j) {
       select_display(0);
-      light_segments(big_7segment_display, test_patterns_3[i]);
+      light_segments(big_7segment_display, test_patterns_3[i], 0, 0);
 
       select_display(1);
-      light_segments(big_7segment_display, test_patterns_3[i]);
+      light_segments(big_7segment_display, test_patterns_3[i], 0, 0);
 
       select_display(2);
-      light_segments(big_7segment_display, test_patterns_3[i]);
+      light_segments(big_7segment_display, test_patterns_3[i], 0, 0);
     }
   }
 
-  delay(long_wait);
+  delay(LONG_DELAY);
   select_display(0);
   blank_display(big_7segment_display);
   select_display(1);
   blank_display(big_7segment_display);
   select_display(2);
   blank_display(big_7segment_display);
-  delay(short_wait);
+  delay(SHORT_DELAY);
 }
 
 int blank_display(int* display) {
@@ -125,7 +121,10 @@ int blank_display(int* display) {
   }
 }
 
-int light_segments(int* display, int* digit) {
+int light_segments(int* display, int* digit, int segment_delay, int pov_delay) {
+  if (pov_delay < POV_DELAY) {
+    pov_delay = POV_DELAY;
+  }
   for (int i = 0; i <  7; i++) {
     int pin = display[i];
     int new_state = digit[i];
@@ -134,8 +133,9 @@ int light_segments(int* display, int* digit) {
     if (old_state != new_state) {
       digitalWrite(pin, new_state);
     }
+    delay(segment_delay);
   }
-  delay(pov_wait);  // stay lit  a short time to optimize PoV effect
+  delay(pov_delay);  // stay lit  a short time to optimize PoV effect
 }
 
 int select_display(int n) {
@@ -147,53 +147,30 @@ int select_display(int n) {
 }
 
 
-int msg(char string[], unsigned int n) {
-  Serial.print(string);
-  Serial.print(": ");
-  Serial.print(n);
-  Serial.print("\n");
-}
-
-int read_inputs() {
+int set_switch_values(int *ones, int *tens, int *hundreds) {
   int display_sum = 0;
   int switch_value = 1;
 
   for (int i = 0; i < sizeof(switch_pins)/sizeof(int); ++i) {
-
     if (digitalRead(switch_pins[i]) == LOW) {
       display_sum += switch_value;
     }
-
     switch_value = switch_value + switch_value;
   }
 
-  display_digit = display_sum;
-}
-
-int light_3_displays() {
-
-  int ones_digit   = (display_digit / 1) % 10;
-  int tens_digit  = (display_digit / 10) % 10;
-  int hundreds_digit = (display_digit / 100) % 10;
+  *ones = (display_sum / 1) % 10;
+  *tens  = (display_sum / 10) % 10;
+  *hundreds = (display_sum / 100) % 10;
 
   // left-pad with blanks when value is 0
-  if (hundreds_digit == 0) {
-    hundreds_digit = BLANK_IDX;
-
-    if (tens_digit == 0) {
-      tens_digit = BLANK_IDX;
-
-      if (ones_digit == 0) {
-        ones_digit = BLANK_IDX;
+  if (*hundreds == 0) {
+    *hundreds = BLANK_IDX;
+    if (*tens == 0) {
+      *tens = BLANK_IDX;
+      if (*ones == 0) {
+        *ones = BLANK_IDX;
       }
     }
   }
-  
-  select_display(0);
-  light_segments(big_7segment_display, digits[hundreds_digit]);
-  select_display(1);
-  light_segments(big_7segment_display, digits[tens_digit]);
-  select_display(2);
-  light_segments(big_7segment_display, digits[ones_digit]);
 }
 
