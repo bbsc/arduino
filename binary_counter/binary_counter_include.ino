@@ -1,12 +1,11 @@
 #define POV_DELAY 5
 #define SHORT_DELAY 25
 #define LONG_DELAY 250
+#define BLANK_IDX 10
 
 // pins that control which 7 segment display will be lit
 int segment_control_pins[] = { 19, 18, 17 };
 int switch_pins[] = { 7, 6, 5, 4, 3, 2, 1, 0 };
-
-int BLANK_IDX = 10;
 
 // test patterns
 int off[] = { 0, 0, 0, 0, 0, 0, 0 };
@@ -122,10 +121,7 @@ int blank_display(int* display) {
 }
 
 int light_segments(int* display, int* digit, int segment_delay, int pov_delay) {
-  if (pov_delay < POV_DELAY) {
-    pov_delay = POV_DELAY;
-  }
-  for (int i = 0; i <  7; i++) {
+  for (int i = 0; i <  7; i++) {   
     int pin = display[i];
     int new_state = digit[i];
     int old_state = digitalRead(pin);
@@ -135,7 +131,8 @@ int light_segments(int* display, int* digit, int segment_delay, int pov_delay) {
     }
     delay(segment_delay);
   }
-  delay(pov_delay);  // stay lit  a short time to optimize PoV effect
+  delay(pov_delay);
+  blank_display(display);
 }
 
 int select_display(int n) {
@@ -147,28 +144,32 @@ int select_display(int n) {
 }
 
 
-int set_switch_values(int *ones, int *tens, int *hundreds) {
-  int display_sum = 0;
-  int switch_value = 1;
-
-  for (int i = 0; i < sizeof(switch_pins)/sizeof(int); ++i) {
+void set_place_values() {
+  //Define as a float so that we can += pow() which returns a float
+  float display_sum_float = 0;
+  for (int i = 0; i < sizeof(switch_pins)/sizeof(int); i++) {
     if (digitalRead(switch_pins[i]) == LOW) {
-      display_sum += switch_value;
+      display_sum_float += pow(2,i);
     }
-    switch_value = switch_value + switch_value;
   }
 
-  *ones = (display_sum / 1) % 10;
-  *tens  = (display_sum / 10) % 10;
-  *hundreds = (display_sum / 100) % 10;
+  //Cast as int so that we can do mods.
+  display_sum_float += 0.1;
+  int display_sum_int = (int) display_sum_float;
+  Serial.print("Sum: ");
+  Serial.print(display_sum_int);
+  
+  place_values[0] = (display_sum_int) % 10;
+  place_values[1] = ((display_sum_int - place_values[0]) / 10) % 10;
+  place_values[2] = (display_sum_int - place_values[1]*10 - place_values[0]) / 100;
 
   // left-pad with blanks when value is 0
-  if (*hundreds == 0) {
-    *hundreds = BLANK_IDX;
-    if (*tens == 0) {
-      *tens = BLANK_IDX;
-      if (*ones == 0) {
-        *ones = BLANK_IDX;
+  if (place_values[2] == 0) {
+    place_values[2] = BLANK_IDX;
+    if (place_values[1] == 0) {
+      place_values[1] = BLANK_IDX;
+      if (place_values[0] == 0) {
+        place_values[0] = BLANK_IDX;
       }
     }
   }
