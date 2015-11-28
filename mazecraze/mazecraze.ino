@@ -1,5 +1,3 @@
-int left_button=10;
-int right_button=0;
 
 int ships_position_old=5;
 int ships_possision=5;
@@ -11,9 +9,14 @@ int the_wall[8] = {
   HIGH,HIGH,HIGH,HIGH,LOW,HIGH,HIGH,HIGH};
   
 int columms[8] = {
-  16,4,5,12,7,14,18,19};
+  11,14,15,3,17,4,8,9};
 int rows[8] = {
-  13,17,9,15,2,8,3,6};
+  2,10,19,7,12,18,13,16};
+int speaker_pin = 5;
+int left_button=6;
+int right_button=0;
+
+
 
 int last_right_button_state=1;
 int last_left_button_state=1;
@@ -21,7 +24,7 @@ int loop_counting=0;
 int loop_limit=800;
 
 int pixels[8][8];
-int speaker_pin = 11;
+
 int frequency = 0;
 
 void set_ships_possision(int calumm) {
@@ -84,15 +87,17 @@ void refresh_pixels() {
   for (int col = 0; col < 8; col++) {
     digitalWrite(columms[col], HIGH);
 
+    int physical_column = 7;
     for (int row = 0; row < 8; row++) {
-      int pixel = pixels[col][row];
+      int pixel = pixels[row][physical_column];
       if (pixel==HIGH) {
         digitalWrite(rows[row], LOW);
       }
+      --physical_column;
     }
 
     for (int row = 0; row < 8; row++) {
-      int pixel = pixels[col][row];
+//      int pixel = pixels[row][col];
       digitalWrite(rows[row], HIGH);
     }
 
@@ -159,7 +164,7 @@ void loop() {
   last_left_button_state = left_button_pressed;
   last_right_button_state = right_button_pressed;
   if (loop_counting==loop_limit) {
-    loop_limit = loop_limit - 50;
+    loop_limit = loop_limit - 5;
     loop_counting=0;
     move_wall();
     check_walls_hit();
