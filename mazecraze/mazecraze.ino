@@ -65,7 +65,12 @@ void check_walls_hit() {
 
 void move_wall() {
   walls_row = walls_row + 1;
-
+  
+  if (walls_row > 7) {
+    walls_row = 0;
+    random_wall();
+  }
+  
   for (int col = 0; col < 8; col++) {
     pixels[col][old_walls_row] = LOW;
   }
@@ -77,10 +82,7 @@ void move_wall() {
   old_walls_row = walls_row;
 
 
-  if (walls_row > 7) {
-    walls_row = 0;
-    random_wall();
-  }
+
   tone(speaker_pin, 100, 10);
 }
 
