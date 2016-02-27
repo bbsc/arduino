@@ -59,8 +59,8 @@ void loop() {
 //   2. Light up all three display digits
 //   3. Light them up so the numbers don't flash
 int light_3_displays(int ones_digit, int tens_digit, int hundreds_digit) {
-  int display_delay_time = 500;
-  int segment_delay_time = 500;
+  int display_delay_time = 1;
+  int segment_delay_time = 0;
   
   select_display(ONES_DISPLAY);
   light_segments(big_7segment_display, digits[ones_digit], segment_delay_time, display_delay_time);
