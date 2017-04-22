@@ -118,7 +118,7 @@ int zilla_spotted = 0;
 int loop_counter = 0;
 void loop() {
   if (digitalRead(sensor) == HIGH) {
-    // ibrazilla is comeing
+    // ibrazilla is coming
     if (zilla_spotted == 0) {
       early_warning_alert();
       zilla_spotted = 1;
