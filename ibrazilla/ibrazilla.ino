@@ -1,4 +1,3 @@
-#include "pitches.h"
 #include <Servo.h>
 
 Servo myservo;
@@ -14,6 +13,9 @@ int flip = 0;
 int firebreath1 = 18;
 int firebreath2 = 17;
 
+int buzzer = 10;
+int buzzer_gnd = 11;
+
 Servo servo1;
 char buffer [32];
 int val = 0;
@@ -26,6 +28,19 @@ void setup() {
   pinMode(firebreath1, OUTPUT);
   pinMode(firebreath2, OUTPUT);
   pinMode(sensor, INPUT_PULLUP);
+  pinMode(buzzer_gnd, OUTPUT);
+  pinMode(buzzer, OUTPUT);
+  digitalWrite(buzzer_gnd, LOW);
+}
+
+void early_warning_alert() {
+  for (int i = 0; i < 10; ++i) {
+    tone(buzzer, 1200,  0);
+    delay(100);
+    tone(buzzer, 500,  0);
+    delay(100);
+  }
+  noTone(buzzer);
 }
 
 void growl() {
@@ -90,7 +105,7 @@ void move_arm() {
     // up
     myservo.write(offset);
     delay(200);
-    myservo.write(offset-35);
+    myservo.write(offset - 35);
     updown = 0;
   } else {
     // down
@@ -99,9 +114,15 @@ void move_arm() {
   }
 }
 
+int zilla_spotted = 0;
 int loop_counter = 0;
 void loop() {
   if (digitalRead(sensor) == HIGH) {
+    // ibrazilla is comeing
+    if (zilla_spotted == 0) {
+      early_warning_alert();
+      zilla_spotted = 1;
+    }
     move_arm();
     // loop counter played 20 times growl
     if (loop_counter <= 0) {
@@ -115,6 +136,7 @@ void loop() {
     move_arm();
   } else {
     fade_eyes();
+    zilla_spotted = 0;
   }
   loop_counter = loop_counter - 1;
 }
